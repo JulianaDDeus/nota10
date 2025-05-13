@@ -199,5 +199,13 @@ button :hover{
     }
 }
 img{
+    margin-top: 10px;
     width: 120px;
+    border-radius: 50%;
+}
+.membros{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content: space-between;
 }

@@ -25,6 +25,10 @@ h1{
     font-weight: 1000;
     font-style: normal;
 }
+#logo{
+    width: 50px;
+    height: auto;
+}
 main{
     padding: 10px;
 }

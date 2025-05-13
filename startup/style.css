@@ -199,13 +199,27 @@ button :hover{
     }
 }
 img{
-    margin-top: 10px;
     width: 120px;
     border-radius: 50%;
 }
-.membros{
+#m {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    align-content: space-between;
+    gap: 20px;
 }
+
+.membros {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* espaço entre imagem e texto */
+    max-width: 600px;
+    text-align: left;
+    margin-top: 20px;
+}
+
+img {
+    width: 120px;
+    border-radius: 50%;
+}
+

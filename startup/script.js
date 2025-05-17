@@ -60,6 +60,18 @@ function planoExibir() {
         const details = document.createElement("details");
         details.setAttribute("aria-expanded", "false");
 
+        const btnExcluirPlano = document.createElement("button");
+        btnExcluirPlano.textContent = "Excluir Plano";
+        btnExcluirPlano.classList.add("btn-excluir-plano");
+        btnExcluirPlano.setAttribute('aria-label', 'Excluir plano de estudo completo');
+        btnExcluirPlano.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                btnExcluirPlano.click();
+            }
+        });
+        btnExcluirPlano.onclick = () => excluirPlano(plano.id);
+
         // Atualiza atributo de acessibilidade quando o plano é aberto ou fechado
         details.addEventListener("toggle", () => {
             const isOpen = details.hasAttribute("open");
@@ -69,21 +81,29 @@ function planoExibir() {
         const titulo = document.createElement("summary");
         titulo.innerHTML = plano.titulo;
         details.appendChild(titulo);
+        details.appendChild(btnExcluirPlano);
 
         const ul = document.createElement("ul");
 
         // Cria a lista de atividades do plano
         plano.atividades.forEach((atividade, indexAtividade) => {
             const li = document.createElement("li");
-            li.innerHTML = `<strong>${atividade.descricao}</strong><br>
+            li.classList.add("atividade-criada")
+            li.innerHTML = `
+            <br><hr>
+            <strong>${atividade.descricao}</strong><br>
             ${atividade.inicio ? `Início: ${atividade.inicio}<br>` : ""} 
             ${atividade.fim ? `Fim: ${atividade.fim}<br>` : ""} 
-            ${atividade.concluido ? "<em>Concluído</em>" : "<em>Pendente</em>"}`;
+            ${atividade.concluido ? "<em style='background-color:#aaffaa;'>Concluído</em>" : "<em style='background-color: #ffaaaa;'>Pendente</em>"}
+            <hr>`;
 
             // Botão para marcar como concluído
             const btnConcluir = document.createElement("button");
+            btnConcluir.classList.add("edit-atividade")
             btnConcluir.textContent = "Concluir";
             btnConcluir.setAttribute('aria-label', 'Marcar atividade como concluída');
+            btnConcluir.classList.add("especial")
+
             btnConcluir.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -102,8 +122,8 @@ function planoExibir() {
                 planoExibir();
             }
 
-            // Botão para editar atividade
-            const btnEditar = document.createElement("button");
+            // Botão para editar atividade - (bugado)
+            /*const btnEditar = document.createElement("button");
             btnEditar.textContent = "Editar";
             btnEditar.setAttribute('aria-label', 'Editar atividade');
             btnEditar.addEventListener('keydown', (e) => {
@@ -117,26 +137,84 @@ function planoExibir() {
             // Só exibe o botão de editar fora da tela inicial
             if(!window.location.pathname.endsWith("index.html") && window.location.pathname !== "/") {
                 li.appendChild(btnEditar);
-            }
+            }*/
 
-            // Botão para excluir plano
-            const btnExcluir = document.createElement("button");
-            btnExcluir.textContent = "Excluir";
-            btnExcluir.setAttribute('aria-label', 'Excluir atividade');
-            btnExcluir.addEventListener('keydown', (e) => {
+            // Botão para excluir atividade
+            const btnExcluirAtividade = document.createElement("button");
+            btnExcluirAtividade.textContent = "Excluir";
+            btnExcluirAtividade.setAttribute('aria-label', 'Excluir atividade');
+            btnExcluirAtividade.classList.add("especial")
+            btnExcluirAtividade.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    btnExcluir.click();
+                    btnExcluirAtividade.click();
                 }
             });
-            btnExcluir.onclick = () => excluirPlano(plano.id);
+            btnExcluirAtividade.onclick = () => excluirAtividadeDoPlano(plano.id, indexAtividade);
 
+            li.appendChild(btnExcluirAtividade);
             li.appendChild(btnConcluir);
-            li.appendChild(btnExcluir);
             ul.appendChild(li);
         });
 
         details.appendChild(ul);
+
+        // Botão para adicionar nova atividade
+        const btnAddAtividade = document.createElement("button");
+        btnAddAtividade.textContent = "Adicionar Atividade";
+        btnAddAtividade.classList.add("btn-add-atividade");
+        btnAddAtividade.onclick = () => {
+            formContainer.style.display = formContainer.style.display === "none" ? "block" : "none";
+        };
+
+        // Formulário de nova atividade
+        const formContainer = document.createElement("div");
+        formContainer.style.display = "none";
+        formContainer.style.marginTop = "10px";
+
+        formContainer.innerHTML = `
+            <input type="text" placeholder="Título da atividade" class="input-desc" style="display:block; margin-bottom:4px;"></textarea>
+            <label style="display:block; margin-top:8px;">Data de início:</label>
+            <input type="date" class="input-inicio" style="display:block; margin-bottom:4px;" />
+            <label style="display:block; margin-top:8px;">Data de fim:</label>
+            <input type="date" class="input-fim" style="display:block; margin-bottom:4px;" />
+            <button class="btn-salvar-atividade">Salvar</button>
+        `;
+
+        formContainer.querySelector(".btn-salvar-atividade").onclick = () => {
+            const desc = formContainer.querySelector(".input-desc").value.trim();
+            const inicio = formContainer.querySelector(".input-inicio").value;
+            const fim = formContainer.querySelector(".input-fim").value;
+
+            if (!desc) {
+                alert("Título obrigatório.");
+                return;
+            }
+
+            if (inicio && fim && new Date(fim) < new Date(inicio)) {
+                alert("A data de fim deve ser depois da data de início.");
+                return;
+            }
+
+            const novaAtividade = {
+                descricao: desc,
+                inicio: inicio || undefined,
+                fim: fim || undefined,
+                concluido: false
+            };
+
+            const planoIndex = planosEstudos.findIndex(p => p.id === plano.id);
+            if (planoIndex !== -1) {
+                planosEstudos[planoIndex].atividades.push(novaAtividade);
+                localStorage.setItem("planosEstudos", JSON.stringify(planosEstudos));
+                registrarHistorico("Nova Atividade Adicionada", plano.titulo);
+                planoExibir();
+            }
+        };
+
+        details.appendChild(btnAddAtividade);
+        details.appendChild(formContainer);
+
         divPlano.appendChild(details);
         planoContainer.appendChild(divPlano);
     });
@@ -239,6 +317,14 @@ function salvarERecarregar() {
     exibirResumoAtividades();
 }
 
+// Exibe o formulário para criação de atividades.
+function exibicaoCriacaoPlano(){
+    const planoEstudo = document.getElementById("plano-estudo")
+    planoEstudo.style.display == "block" ? planoEstudo.style.display = "none" : planoEstudo.style.display = "block"
+    const displayEspecial = document.querySelectorAll(".display.especial")[0]
+    displayEspecial.style.display = "block"
+}
+
 // Avança para a criação de atividade
 function planoExibirEtapa1() {
     const tituloInput = document.getElementById("titulo-plano").value;
@@ -284,7 +370,7 @@ function planoSalvar(organizacao) {
     let novoPlano;
 
     if (editandoPlanoId && editandoPlanoIndex !== null) {
-        // Edição de plano existente
+        // Edição de plano existente (nunca é acessado - motivo: bugado)
         if (dataInicio && dataFim && new Date(dataFim) < new Date(dataInicio)) {
             alert("A data de término deve ser posterior à data de início.");
             return;
@@ -354,15 +440,18 @@ function planoSalvar(organizacao) {
     exibirResumoAtividades();
     ocultarTodasEtapas();
     limparCamposFormulario(["titulo-plano", "atividade-plano", "data-inicio-plano", "data-fim-plano"]);
+    exibicaoCriacaoPlano()
 }
 
 // Cancela a criação de plano
 function planoCancelar() {
+    exibicaoCriacaoPlano()
     ocultarTodasEtapas();
     limparCamposFormulario(["titulo-plano", "atividade-plano", "data-inicio-plano", "data-fim-plano"]);
 }
 
-// Carrega um plano existente para edição 
+// Carrega um plano existente para edição
+/*
 function editarPlano(planoId, indexAtividade) {
     const plano = planosEstudos.find(p => p.id === planoId);
     if (!plano) return;
@@ -380,19 +469,37 @@ function editarPlano(planoId, indexAtividade) {
     ocultarTodasEtapas();
     document.getElementById("atividade").style.display = "block";
 }
+*/
+
+// Remove a atividade selecionada
+function excluirAtividadeDoPlano(planoId, indexAtividade) {
+    const planoIndex = planosEstudos.findIndex(p => p.id === planoId);
+    if (planoIndex === -1) return;
+
+    planosEstudos[planoIndex].atividades.splice(indexAtividade, 1); // Remove atividade
+
+    // Se não restar nenhuma atividade, remove o plano inteiro
+    if (planosEstudos[planoIndex].atividades.length === 0) {
+        registrarHistorico("Plano Removido", planosEstudos[planoIndex].titulo);
+        planosEstudos.splice(planoIndex, 1);
+    } else {
+        registrarHistorico("Atividade Removida", planosEstudos[planoIndex].titulo);
+    }
+
+    localStorage.setItem("planosEstudos", JSON.stringify(planosEstudos));
+    planoExibir();
+    exibirResumoAtividades();
+}
 
 // Remove um plano do sistema
 function excluirPlano(planoId) {
-    const plano = planosEstudos.find(p => p.id === planoId);
-    const novosPlanos = planosEstudos.filter(p => p.id !== planoId);
-
-    localStorage.setItem("planosEstudos", JSON.stringify(novosPlanos));
-
-    planosEstudos = novosPlanos;
-
-    registrarHistorico("Exclusão do Plano", plano.titulo);
+    planosEstudos = planosEstudos.filter(plano => plano.id !== planoId);
+    localStorage.setItem("planosEstudos", JSON.stringify(planosEstudos));
+    registrarHistorico("Plano Excluído", planoId);
     planoExibir();
+    exibirResumoAtividades();
 }
+
 
 // FOCOS DE ESTUDO
 
@@ -485,6 +592,7 @@ function criarFocoElemento(foco) {
 
     // Mostra os filhos (hierarquia)
     const detalhes = document.createElement("details");
+    detalhes.classList.add("especial")
     const resumo = document.createElement("summary");
     resumo.textContent = "Mostrar Filhos";
     detalhes.setAttribute("aria-expanded", "false"); 
@@ -522,18 +630,21 @@ function criarFocoElemento(foco) {
     btnAdicionarFilho.textContent = "Adicionar Filho";
     btnAdicionarFilho.setAttribute("aria-label", `Adicionar filho ao foco ${foco.titulo}`);
     btnAdicionarFilho.onclick = () => mostrarFormularioAdicionarFilho(foco.id);
+    btnAdicionarFilho.classList.add("especial")
 
     // Botão para adicionar um elemento periférico (foco)
     const btnAdicionarPeriferico = document.createElement("button");
     btnAdicionarPeriferico.textContent = "Adicionar Relação Periférica";
     btnAdicionarPeriferico.setAttribute("aria-label", `Adicionar relação periférica ao foco ${foco.titulo}`);
     btnAdicionarPeriferico.onclick = () => mostrarFormularioAdicionarPeriferico(foco.id);
+    btnAdicionarPeriferico.classList.add("especial")
 
     // Botão para excluir foco
     const btnExcluir = document.createElement("button");
     btnExcluir.textContent = "Excluir";
     btnExcluir.setAttribute("aria-label", `Excluir foco ${foco.titulo}`);
     btnExcluir.onclick = () => excluirFoco(foco.id);
+    btnExcluir.classList.add("especial")
 
     // Botão de editar (aparece se o formulário principal estiver presente)
     if(document.getElementById("form-focos-estudos")){
@@ -710,29 +821,53 @@ function exibirHistórico() {
 
     if (historico.length === 0) {
         container.innerHTML += "<p>Nenhuma atividade registrada.</p>";
-        return;
+    } else {
+        const ul = document.createElement("ul");
+
+        historico
+            .sort((a, b) => new Date(b.data) - new Date(a.data)) // Mais recente primeiro
+            .forEach(item => {
+                const li = document.createElement("li");
+                const dataFormatada = new Date(item.data).toLocaleString();
+                li.textContent = `[${dataFormatada}] ${item.acao}: ${item.detalhes}`;
+                ul.appendChild(li);
+            });
+
+        container.appendChild(ul);
     }
 
-    const ul = document.createElement("ul");
+    // Cria o botão Limpar Histórico
+    let btnLimpar = document.getElementById("btnLimparHistorico");
+    if (!btnLimpar) {
+        btnLimpar = document.createElement("button");
+        btnLimpar.id = "btnLimparHistorico";
+        btnLimpar.textContent = "Limpar Histórico";
+        container.appendChild(btnLimpar);
 
-    historico
-        .sort((a, b) => new Date(b.data) - new Date(a.data)) // Ordena do mais recente ao mais antigo
-        .forEach(item => {
-            const li = document.createElement("li");
-            const dataFormatada = new Date(item.data).toLocaleString();
-            li.textContent = `[${dataFormatada}] ${item.acao}: ${item.detalhes}`;
-            ul.appendChild(li);
+        btnLimpar.addEventListener("click", () => {           
+            limparHistorico();  
         });
+    }
+}
 
-    container.appendChild(ul);
-    console.log("exibindo historico")
+// Limpa o histórico e atualiza a exibição
+function limparHistorico() {
+    localStorage.removeItem("historicoAtividades");
+    exibirHistórico();
 }
 
 // AO CARREGAR A PÁGINA
-
 document.addEventListener("DOMContentLoaded", () => {
     planoExibir();
     focoExibir();
     exibirResumoAtividades();
     exibirHistórico();
+
+    // Adiciona evento no botão limpar histórico
+    const btnLimpar = document.getElementById("btnLimparHistorico");
+    if (btnLimpar) {
+        btnLimpar.addEventListener("click", () => {      
+            limparHistorico();         
+        });
+    }
 });

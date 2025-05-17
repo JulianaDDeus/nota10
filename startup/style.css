@@ -1,18 +1,13 @@
-/*
-A documentação vai se adaptar as alterações feitas. Se tiver algo muito importante que não pode faltar nela, avise.
-*/
-
-/* tem instruções no script talvez você precise ler elas e o código do Paulo para poder estilizar tudo. */
-
-/* esse estilo foi somente para organização se quiser excluir tudo não tem problema. */
-
 *{
     margin: 0;
     padding: 0;
     font-family: "Montserrat", sans-serif;
     font-optical-sizing: auto;
     font-weight: 400;
-    font-style: normal;
+}
+*:focus{
+    outline: solid 3px rgb(160, 20, 150);
+
 }
 header{
     background: rgb(62, 17, 125);
@@ -25,22 +20,53 @@ h1{
     font-weight: 1000;
     font-style: normal;
 }
-#logo{
-    width: 50px;
+.logo{
+    width: 30px;
     height: auto;
 }
 main{
     padding: 10px;
 }
+@media (min-width: 768px){
+    #form-ajuda{
+        border: solid 2px rgb(62, 17, 125);
+        width: 75vw;
+        margin-left: 12.5vw;
+        text-align: center;
+    }
+}
+#plano-estudo{
+    position: absolute;
+    display: none;
+    background-color: white;
+    padding: 10px;
+    border: solid 3px black;
+    border-radius: 10px;
+    margin-left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 #conteudo-foco{
     width: 95vw;
     height: 80vh;
+}
+details.especial>*{
+    padding: 5px;
+    border: dashed 1px black;
+    margin: 10px 0;
+    margin-left: 25px;
+}
+details.especial>summary{
+    margin-left: 0;
+    border: none;
 }
 .lista li, #relacoes-ul{
     list-style: inside;
 }
 
-.display{display: none;} /* se quiser excluir isso converse com o Paulo */
+.display{display: none;}
+.display.especial{display: block;}
 nav{
     margin-top: 10px;
 }
@@ -79,7 +105,7 @@ h3, p{
 input, textarea{
     margin-top: 5px;
     margin-bottom: 5px;
-    background: rgb(196, 241, 206);
+    background: rgb(229, 250, 233);
     color: rgb(8, 87, 116);
     border-style: solid;
     border-width: 1px;
@@ -96,9 +122,9 @@ button, #enviar{
     border-radius: 5px;
     border-color: rgb(8, 87, 116);
 }
-button :hover{
+button:hover{
     border-width: 2px;
-    background: rgb(8, 87, 116);
+    background: rgb(0, 80, 110);
     color: rgb(168, 236, 183);
 }
 @media (max-width: 767px) {
@@ -148,6 +174,10 @@ button :hover{
     button, #enviar {
         margin-top: 5px;
         width: 100%;
+    }
+    button.especial{
+        display: inline;
+        width: fit-content;
     }
 }
 @media (min-width: 767px) and (max-width: 1025px) {
@@ -200,26 +230,4 @@ button :hover{
 }
 img{
     width: 120px;
-    border-radius: 50%;
 }
-#m {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
-.membros {
-    display: flex;
-    align-items: center;
-    gap: 20px; /* espaço entre imagem e texto */
-    max-width: 600px;
-    text-align: left;
-    margin-top: 20px;
-}
-
-img {
-    width: 120px;
-    border-radius: 50%;
-}
-
